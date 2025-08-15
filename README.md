@@ -130,9 +130,9 @@ mix format --check-formatted
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the Apache 2.0 License - see the [LICENSE](LICENSE) file for details.
 
 ## Acknowledgments
 
 - Inspired by the original [PostCSS](https://github.com/postcss/postcss) JavaScript library
-- Built with [Elixir](https://elixir-lang.org/) and the Phoenix ecosystem
+- Built with [Elixir](https://elixir-lang.org/)
