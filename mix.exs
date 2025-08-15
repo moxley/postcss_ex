@@ -1,13 +1,21 @@
 defmodule PostCSS.MixProject do
   use Mix.Project
 
+  @version "0.1.0"
+  @source_url "https://github.com/your-username/postcss_ex"
+
   def project do
     [
       app: :postcss,
-      version: "0.1.0",
+      version: @version,
       elixir: "~> 1.16",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      description: description(),
+      package: package(),
+      docs: docs(),
+      name: "PostCSS",
+      source_url: @source_url
     ]
   end
 
@@ -21,8 +29,38 @@ defmodule PostCSS.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      # {:dep_from_hexpm, "~> 0.3.0"},
-      # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
+      {:ex_doc, "~> 0.31", only: :dev, runtime: false}
+    ]
+  end
+
+  defp description do
+    """
+    PostCSS for Elixir - A tool for transforming CSS with plugins.
+
+    An Elixir implementation of the popular PostCSS library, providing CSS parsing,
+    AST manipulation, and stringification capabilities.
+    """
+  end
+
+  defp package do
+    [
+      name: "postcss",
+      files: ~w(lib .formatter.exs mix.exs README* LICENSE*),
+      licenses: ["Apache-2.0"],
+      links: %{
+        "GitHub" => @source_url,
+        "Docs" => "https://hexdocs.pm/postcss"
+      },
+      maintainers: ["Your Name"]
+    ]
+  end
+
+  defp docs do
+    [
+      main: "PostCSS",
+      source_ref: "v#{@version}",
+      source_url: @source_url,
+      extras: ["README.md"]
     ]
   end
 end
