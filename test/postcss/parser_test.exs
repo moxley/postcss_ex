@@ -118,7 +118,7 @@ defmodule Postcss.ParserTest do
                    raws: %{}
                  }
                ],
-               raws: %{},
+               raws: %{after: "\n"},
                type: :root
              }
     end

@@ -49,7 +49,7 @@ defmodule Postcss.RuleTest do
         raws: %{before: "\n", after: "\n", between: " "}
       }
 
-      expected = ".foo {}"
+      expected = ".foo {\n}"
       assert to_string(rule) == expected
     end
   end
