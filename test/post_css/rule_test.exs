@@ -1,7 +1,7 @@
-defmodule Postcss.RuleTest do
+defmodule PostCSS.RuleTest do
   use ExUnit.Case, async: true
 
-  alias Postcss.{Rule, Declaration}
+  alias PostCSS.{Rule, Declaration}
 
   describe "Rule struct" do
     test "creates rule with selector" do

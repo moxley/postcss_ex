@@ -1,4 +1,4 @@
-defmodule Postcss.Root do
+defmodule PostCSS.Root do
   @moduledoc """
   Represents the root node of a PostCSS AST.
 
@@ -30,7 +30,7 @@ defmodule Postcss.Root do
 
     # Implements PostCSS body() method logic
     defp body(node) do
-      alias Postcss.Raws
+      alias PostCSS.Raws
 
       if Enum.empty?(node.nodes) do
         ""
@@ -64,7 +64,7 @@ defmodule Postcss.Root do
           needs_semicolon = index != last_non_comment_index or container_semicolon
 
           semicolon_str =
-            if needs_semicolon and match?(%Postcss.Declaration{}, child), do: ";", else: ""
+            if needs_semicolon and match?(%PostCSS.Declaration{}, child), do: ";", else: ""
 
           "#{before}#{child_str}#{semicolon_str}"
         end)
@@ -77,7 +77,7 @@ defmodule Postcss.Root do
       nodes
       |> Enum.with_index()
       |> Enum.reverse()
-      |> Enum.find(fn {node, _index} -> not match?(%Postcss.Comment{}, node) end)
+      |> Enum.find(fn {node, _index} -> not match?(%PostCSS.Comment{}, node) end)
       |> case do
         {_node, index} -> index
         nil -> -1
@@ -86,7 +86,7 @@ defmodule Postcss.Root do
 
     # Implements PostCSS raw() method logic for "before" values
     defp raw(node, :before) do
-      alias Postcss.Raws
+      alias PostCSS.Raws
 
       # Check if node has its own "before" raw
       case Map.get(node.raws || %{}, :before) do
@@ -94,10 +94,10 @@ defmodule Postcss.Root do
           # Apply PostCSS logic: first rule in root gets ""
           # For now, we'll use a simple fallback since we don't have parent references
           case node do
-            %Postcss.Declaration{} ->
+            %PostCSS.Declaration{} ->
               Raws.get(node, :before, Map.get(Raws.defaults(), :before_decl))
 
-            %Postcss.Comment{} ->
+            %PostCSS.Comment{} ->
               Raws.get(node, :before, Map.get(Raws.defaults(), :before_comment))
 
             _ ->

@@ -1,4 +1,4 @@
-defmodule Postcss.AtRule do
+defmodule PostCSS.AtRule do
   @moduledoc """
   Represents a CSS at-rule like @import, @media, @keyframes, etc.
 
@@ -49,7 +49,7 @@ defmodule Postcss.AtRule do
 
     # Implements PostCSS block() method logic (same as Rule)
     defp block(node, start) do
-      alias Postcss.Raws
+      alias PostCSS.Raws
 
       # Get "between" (space before opening brace) - defaults to beforeOpen (" ")
       between = Map.get(node.raws || %{}, :between, Map.get(Raws.defaults(), :before_open))
@@ -96,7 +96,7 @@ defmodule Postcss.AtRule do
 
     # Implements PostCSS body() method logic (same as Rule)
     defp body(node) do
-      alias Postcss.Raws
+      alias PostCSS.Raws
 
       if Enum.empty?(node.nodes) do
         ""
@@ -120,7 +120,7 @@ defmodule Postcss.AtRule do
           needs_semicolon = index != last_non_comment_index or container_semicolon
 
           semicolon_str =
-            if needs_semicolon and match?(%Postcss.Declaration{}, child), do: ";", else: ""
+            if needs_semicolon and match?(%PostCSS.Declaration{}, child), do: ";", else: ""
 
           "#{before}#{child_str}#{semicolon_str}"
         end)
@@ -133,7 +133,7 @@ defmodule Postcss.AtRule do
       nodes
       |> Enum.with_index()
       |> Enum.reverse()
-      |> Enum.find(fn {node, _index} -> not match?(%Postcss.Comment{}, node) end)
+      |> Enum.find(fn {node, _index} -> not match?(%PostCSS.Comment{}, node) end)
       |> case do
         {_node, index} -> index
         nil -> -1
@@ -142,7 +142,7 @@ defmodule Postcss.AtRule do
 
     # Implements PostCSS raw() method logic for "before" values
     defp raw(node, :before) do
-      alias Postcss.Raws
+      alias PostCSS.Raws
 
       # Check if node has its own "before" raw
       raw_before =
@@ -150,14 +150,14 @@ defmodule Postcss.AtRule do
           nil ->
             # Apply PostCSS logic for different node types
             case node do
-              %Postcss.Declaration{} -> Map.get(Raws.defaults(), :before_decl)
-              %Postcss.Comment{} -> Map.get(Raws.defaults(), :before_comment)
+              %PostCSS.Declaration{} -> Map.get(Raws.defaults(), :before_decl)
+              %PostCSS.Comment{} -> Map.get(Raws.defaults(), :before_comment)
               _ -> Map.get(Raws.defaults(), :before_rule)
             end
 
           value ->
             # Normalize inline formatting to block formatting for declarations
-            if match?(%Postcss.Declaration{}, node) and is_binary(value) and
+            if match?(%PostCSS.Declaration{}, node) and is_binary(value) and
                  not String.contains?(value, "\n") do
               # Convert inline spacing (like " ") to proper block formatting
               Map.get(Raws.defaults(), :before_decl)

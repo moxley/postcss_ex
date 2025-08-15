@@ -1,7 +1,7 @@
-defmodule Postcss.ParserTest do
+defmodule PostCSS.ParserTest do
   use ExUnit.Case, async: true
 
-  alias Postcss.{Parser, Root, Rule, Declaration, Comment}
+  alias PostCSS.{Parser, Root, Rule, Declaration, Comment}
 
   describe "basic parsing" do
     test "parses simple declaration" do
@@ -106,10 +106,10 @@ defmodule Postcss.ParserTest do
 
       root = Parser.parse(css)
 
-      assert root == %Postcss.Root{
+      assert root == %PostCSS.Root{
                source: nil,
                nodes: [
-                 %Postcss.AtRule{
+                 %PostCSS.AtRule{
                    name: "import",
                    params:
                      "url(\"https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap\")",
@@ -161,7 +161,7 @@ defmodule Postcss.ParserTest do
     test "handles unclosed braces gracefully" do
       css = ".foo { color: red;"
 
-      assert_raise Postcss.CssSyntaxError, fn ->
+      assert_raise PostCSS.CssSyntaxError, fn ->
         Parser.parse(css)
       end
     end
@@ -169,7 +169,7 @@ defmodule Postcss.ParserTest do
     test "handles unexpected closing brace" do
       css = "color: red; }"
 
-      assert_raise Postcss.CssSyntaxError, fn ->
+      assert_raise PostCSS.CssSyntaxError, fn ->
         Parser.parse(css)
       end
     end

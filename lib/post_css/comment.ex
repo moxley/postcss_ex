@@ -1,10 +1,10 @@
-defmodule Postcss.Comment do
+defmodule PostCSS.Comment do
   @moduledoc """
   Represents a CSS comment in the AST.
 
   ## Examples
 
-      iex> comment = %Postcss.Comment{text: "This is a comment"}
+      iex> comment = %PostCSS.Comment{text: "This is a comment"}
       iex> comment.text
       "This is a comment"
   """
@@ -22,8 +22,8 @@ defmodule Postcss.Comment do
         }
 end
 
-defimpl String.Chars, for: Postcss.Comment do
-  def to_string(%Postcss.Comment{text: text, raws: raws}) do
+defimpl String.Chars, for: PostCSS.Comment do
+  def to_string(%PostCSS.Comment{text: text, raws: raws}) do
     left = Map.get(raws, :left, "")
     right = Map.get(raws, :right, "")
     "/*#{left}#{text}#{right}*/"

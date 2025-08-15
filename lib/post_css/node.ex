@@ -1,4 +1,4 @@
-defmodule Postcss.Node do
+defmodule PostCSS.Node do
   @moduledoc """
   Protocol for PostCSS AST nodes.
 
@@ -24,9 +24,9 @@ defmodule Postcss.Node do
   @doc """
   Returns the type of the node.
   """
-  def type(%{__struct__: Postcss.Declaration}), do: :declaration
-  def type(%{__struct__: Postcss.Rule}), do: :rule
-  def type(%{__struct__: Postcss.Root}), do: :root
-  def type(%{__struct__: Postcss.AtRule}), do: :at_rule
-  def type(%{__struct__: Postcss.Comment}), do: :comment
+  def type(%{__struct__: PostCSS.Declaration}), do: :declaration
+  def type(%{__struct__: PostCSS.Rule}), do: :rule
+  def type(%{__struct__: PostCSS.Root}), do: :root
+  def type(%{__struct__: PostCSS.AtRule}), do: :at_rule
+  def type(%{__struct__: PostCSS.Comment}), do: :comment
 end

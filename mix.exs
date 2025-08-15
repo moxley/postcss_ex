@@ -1,4 +1,4 @@
-defmodule Postcss.MixProject do
+defmodule PostCSS.MixProject do
   use Mix.Project
 
   def project do

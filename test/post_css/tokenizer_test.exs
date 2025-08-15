@@ -1,7 +1,7 @@
-defmodule Postcss.TokenizerTest do
+defmodule PostCSS.TokenizerTest do
   use ExUnit.Case, async: true
 
-  alias Postcss.Tokenizer
+  alias PostCSS.Tokenizer
 
   describe "basic tokenization" do
     test "tokenizes simple declaration" do

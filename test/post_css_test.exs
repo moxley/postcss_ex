@@ -1,27 +1,27 @@
-defmodule PostcssTest do
+defmodule PostCSSTest do
   use ExUnit.Case, async: true
-  doctest Postcss
+  doctest PostCSS
 
-  alias Postcss
+  alias PostCSS
 
   describe "parse/1" do
     test "parses simple CSS" do
       css = ".foo { color: red; }"
-      root = Postcss.parse(css)
+      root = PostCSS.parse(css)
 
-      assert %Postcss.Root{} = root
+      assert %PostCSS.Root{} = root
       assert length(root.nodes) == 1
 
       [rule] = root.nodes
-      assert %Postcss.Rule{} = rule
+      assert %PostCSS.Rule{} = rule
       assert rule.selector == ".foo"
     end
   end
 
   describe "stringify/1" do
     test "stringifies CSS AST" do
-      root = Postcss.parse(".foo { color: red; }")
-      css_string = Postcss.stringify(root)
+      root = PostCSS.parse(".foo { color: red; }")
+      css_string = PostCSS.stringify(root)
 
       assert is_binary(css_string)
       assert String.contains?(css_string, ".foo")
@@ -59,8 +59,8 @@ defmodule PostcssTest do
       }
       """
 
-      root = Postcss.parse(css)
-      css_string = Postcss.stringify(root)
+      root = PostCSS.parse(css)
+      css_string = PostCSS.stringify(root)
 
       assert css_string == css
     end
@@ -76,8 +76,8 @@ defmodule PostcssTest do
       }
       """
 
-      root = Postcss.parse(css)
-      css_string = Postcss.stringify(root)
+      root = PostCSS.parse(css)
+      css_string = PostCSS.stringify(root)
 
       assert css_string == css
     end

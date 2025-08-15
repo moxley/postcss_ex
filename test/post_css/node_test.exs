@@ -1,8 +1,8 @@
-defmodule Postcss.NodeTest do
+defmodule PostCSS.NodeTest do
   use ExUnit.Case, async: true
 
-  alias Postcss
-  alias Postcss.{Node, Declaration, Rule, Root}
+  alias PostCSS
+  alias PostCSS.{Node, Declaration, Rule, Root}
 
   describe "Node protocol" do
     test "nodes implement to_string/1" do

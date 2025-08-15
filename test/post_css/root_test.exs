@@ -1,7 +1,7 @@
-defmodule Postcss.RootTest do
+defmodule PostCSS.RootTest do
   use ExUnit.Case, async: true
 
-  alias Postcss.{Root, Rule, Declaration}
+  alias PostCSS.{Root, Rule, Declaration}
 
   describe "Root struct" do
     test "creates empty root" do

@@ -1,4 +1,4 @@
-defmodule Postcss.Raws do
+defmodule PostCSS.Raws do
   @moduledoc """
   Utilities for handling PostCSS raw formatting preservation.
 
@@ -77,7 +77,7 @@ defmodule Postcss.Raws do
       nil ->
         # Default behavior: semicolon for declarations, but not for last declaration in some contexts
         case node do
-          %Postcss.Declaration{} -> not is_last
+          %PostCSS.Declaration{} -> not is_last
           _ -> false
         end
     end

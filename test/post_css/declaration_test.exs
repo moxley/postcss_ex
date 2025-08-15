@@ -1,7 +1,7 @@
-defmodule Postcss.DeclarationTest do
+defmodule PostCSS.DeclarationTest do
   use ExUnit.Case, async: true
 
-  alias Postcss.Declaration
+  alias PostCSS.Declaration
 
   describe "Declaration struct" do
     test "creates declaration with prop and value" do

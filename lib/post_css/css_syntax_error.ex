@@ -1,4 +1,4 @@
-defmodule Postcss.CssSyntaxError do
+defmodule PostCSS.CssSyntaxError do
   @moduledoc """
   Exception raised when CSS parsing fails.
   """

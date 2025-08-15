@@ -1,4 +1,4 @@
-defmodule Postcss.Declaration do
+defmodule PostCSS.Declaration do
   @moduledoc """
   Represents a CSS declaration (property: value pair).
 

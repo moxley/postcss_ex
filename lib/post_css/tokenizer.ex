@@ -1,4 +1,4 @@
-defmodule Postcss.Tokenizer do
+defmodule PostCSS.Tokenizer do
   @moduledoc """
   CSS Tokenizer for PostCSS.
 

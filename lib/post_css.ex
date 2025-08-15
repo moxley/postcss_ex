@@ -1,4 +1,4 @@
-defmodule Postcss do
+defmodule PostCSS do
   @moduledoc """
   PostCSS for Elixir - A tool for transforming CSS with plugins.
 
@@ -6,14 +6,14 @@ defmodule Postcss do
   providing CSS parsing, AST manipulation, and stringification.
   """
 
-  alias Postcss.{Parser, Root, Rule, Declaration, AtRule, Comment}
+  alias PostCSS.{Parser, Root, Rule, Declaration, AtRule, Comment}
 
   @doc """
   Parses CSS string into a PostCSS AST.
 
   ## Examples
 
-      iex> root = Postcss.parse("color: red")
+      iex> root = PostCSS.parse("color: red")
       iex> [decl] = root.nodes
       iex> decl.prop
       "color"
@@ -29,8 +29,8 @@ defmodule Postcss do
 
   ## Examples
 
-      iex> root = Postcss.parse(".foo { color: red; }")
-      iex> Postcss.stringify(root)
+      iex> root = PostCSS.parse(".foo { color: red; }")
+      iex> PostCSS.stringify(root)
       ".foo {\\n  color: red;\\n}"
   """
   def stringify(%Root{} = root) do
@@ -46,11 +46,11 @@ defmodule Postcss do
 
   ## Examples
 
-      iex> Postcss.decl("color", "red")
-      %Postcss.Declaration{prop: "color", value: "red"}
+      iex> PostCSS.decl("color", "red")
+      %PostCSS.Declaration{prop: "color", value: "red"}
 
-      iex> Postcss.decl("color", "red", important: true)
-      %Postcss.Declaration{prop: "color", value: "red", important: true}
+      iex> PostCSS.decl("color", "red", important: true)
+      %PostCSS.Declaration{prop: "color", value: "red", important: true}
   """
   def decl(prop, value, opts \\ []) do
     %Declaration{
@@ -65,12 +65,12 @@ defmodule Postcss do
 
   ## Examples
 
-      iex> Postcss.rule(".foo")
-      %Postcss.Rule{selector: ".foo", nodes: []}
+      iex> PostCSS.rule(".foo")
+      %PostCSS.Rule{selector: ".foo", nodes: []}
 
-      iex> decl = Postcss.decl("color", "red")
-      iex> Postcss.rule(".foo", [decl])
-      %Postcss.Rule{selector: ".foo", nodes: [decl]}
+      iex> decl = PostCSS.decl("color", "red")
+      iex> PostCSS.rule(".foo", [decl])
+      %PostCSS.Rule{selector: ".foo", nodes: [decl]}
   """
   def rule(selector, nodes \\ []) do
     %Rule{
@@ -84,12 +84,12 @@ defmodule Postcss do
 
   ## Examples
 
-      iex> Postcss.root()
-      %Postcss.Root{nodes: []}
+      iex> PostCSS.root()
+      %PostCSS.Root{nodes: []}
 
-      iex> rule = Postcss.rule(".foo")
-      iex> Postcss.root([rule])
-      %Postcss.Root{nodes: [rule]}
+      iex> rule = PostCSS.rule(".foo")
+      iex> PostCSS.root([rule])
+      %PostCSS.Root{nodes: [rule]}
   """
   def root(nodes \\ []) do
     %Root{nodes: nodes}
@@ -100,12 +100,12 @@ defmodule Postcss do
 
   ## Examples
 
-      iex> Postcss.at_rule("import", "url(\\"styles.css\\")")
-      %Postcss.AtRule{name: "import", params: "url(\\"styles.css\\")"}
+      iex> PostCSS.at_rule("import", "url(\\"styles.css\\")")
+      %PostCSS.AtRule{name: "import", params: "url(\\"styles.css\\")"}
 
-      iex> decl = Postcss.decl("color", "red")
-      iex> Postcss.at_rule("media", "screen", [decl])
-      %Postcss.AtRule{name: "media", params: "screen", nodes: [decl]}
+      iex> decl = PostCSS.decl("color", "red")
+      iex> PostCSS.at_rule("media", "screen", [decl])
+      %PostCSS.AtRule{name: "media", params: "screen", nodes: [decl]}
   """
   def at_rule(name, params \\ nil, nodes \\ []) do
     %AtRule{
@@ -120,7 +120,7 @@ defmodule Postcss do
 
   ## Examples
 
-      iex> comment = Postcss.comment("This is a comment")
+      iex> comment = PostCSS.comment("This is a comment")
       iex> comment.text
       "This is a comment"
   """
