@@ -1,7 +1,11 @@
 defmodule PostCSS.ParserTest do
   use ExUnit.Case, async: true
 
-  alias PostCSS.{Parser, Root, Rule, Declaration, Comment}
+  alias PostCSS.Comment
+  alias PostCSS.Declaration
+  alias PostCSS.Parser
+  alias PostCSS.Root
+  alias PostCSS.Rule
 
   describe "basic parsing" do
     test "parses simple declaration" do

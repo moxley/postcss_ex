@@ -5,7 +5,14 @@ defmodule PostCSS.Parser do
   Converts tokens from the tokenizer into an Abstract Syntax Tree (AST).
   """
 
-  alias PostCSS.{Tokenizer, Root, Rule, Declaration, AtRule, Comment, CssSyntaxError, Raws}
+  alias PostCSS.AtRule
+  alias PostCSS.Comment
+  alias PostCSS.CssSyntaxError
+  alias PostCSS.Declaration
+  alias PostCSS.Raws
+  alias PostCSS.Root
+  alias PostCSS.Rule
+  alias PostCSS.Tokenizer
 
   @doc """
   Parses CSS string into a PostCSS AST.

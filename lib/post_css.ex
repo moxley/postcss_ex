@@ -6,7 +6,12 @@ defmodule PostCSS do
   providing CSS parsing, AST manipulation, and stringification.
   """
 
-  alias PostCSS.{Parser, Root, Rule, Declaration, AtRule, Comment}
+  alias PostCSS.AtRule
+  alias PostCSS.Comment
+  alias PostCSS.Declaration
+  alias PostCSS.Parser
+  alias PostCSS.Root
+  alias PostCSS.Rule
 
   @doc """
   Parses CSS string into a PostCSS AST.
