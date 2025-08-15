@@ -14,11 +14,9 @@ defmodule PostCSS do
   ## Examples
 
       iex> root = PostCSS.parse("color: red")
-      iex> [decl] = root.nodes
-      iex> decl.prop
-      "color"
-      iex> decl.value
-      "red"
+      iex> %PostCSS.Root{nodes: [node]} = root
+      iex> node
+      %PostCSS.Declaration{prop: "color", value: "red"}
   """
   def parse(css) when is_binary(css) do
     Parser.parse(css)
