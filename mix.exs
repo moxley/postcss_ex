@@ -35,9 +35,9 @@ defmodule PostCSS.MixProject do
 
   defp description do
     """
-    PostCSS for Elixir - A tool for transforming CSS with plugins.
+    PostCSS for Elixir - A tool for transforming CSS.
 
-    An Elixir implementation of the popular [PostCSS](https://postcss.org/) library, providing CSS parsing,
+    An Elixir implementation of the popular PostCSS JavaScript library, providing CSS parsing,
     AST manipulation, and stringification capabilities.
     """
   end
