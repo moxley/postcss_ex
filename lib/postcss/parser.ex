@@ -5,7 +5,7 @@ defmodule Postcss.Parser do
   Converts tokens from the tokenizer into an Abstract Syntax Tree (AST).
   """
 
-  alias Postcss.{Tokenizer, Root, Rule, Declaration, CssSyntaxError}
+  alias Postcss.{Tokenizer, Root, Rule, Declaration, AtRule, Comment, CssSyntaxError}
 
   @doc """
   Parses CSS string into a PostCSS AST.
@@ -65,6 +65,14 @@ defmodule Postcss.Parser do
 
   defp parse_node(tokens) do
     case tokens do
+      # Comment
+      [{:comment, comment_text, _, _} | rest] ->
+        parse_comment(comment_text, rest)
+
+      # At-rule: @import, @media, etc.
+      [{:at_word, at_rule_text, _, _} | rest] ->
+        parse_at_rule(at_rule_text, rest)
+
       # Simple declaration: word : value
       [{:word, prop, _, _} | rest] ->
         rest = skip_spaces(rest)
@@ -182,6 +190,11 @@ defmodule Postcss.Parser do
         # Skip spaces in declarations
         parse_declarations(rest, acc)
 
+      [{:comment, comment_text, _, _} | rest] ->
+        # Handle comments inside rule blocks
+        {comment, remaining} = parse_comment(comment_text, rest)
+        parse_declarations(remaining, [comment | acc])
+
       _ ->
         case parse_declaration(tokens) do
           {decl, remaining} ->
@@ -275,4 +288,108 @@ defmodule Postcss.Parser do
 
   defp skip_semicolon([{:semicolon, _, _} | rest]), do: skip_spaces(rest)
   defp skip_semicolon(tokens), do: skip_spaces(tokens)
+
+  defp parse_at_rule(at_rule_text, tokens) do
+    # Extract the rule name (remove the @ symbol)
+    name = String.slice(at_rule_text, 1..-1//1)
+
+    # Collect parameters until we hit a semicolon or opening brace
+    {param_tokens, remaining} = collect_at_rule_params(tokens, [])
+
+    # Convert parameter tokens to a string
+    params =
+      if Enum.empty?(param_tokens) do
+        nil
+      else
+        extract_params_from_tokens(param_tokens)
+      end
+
+    case remaining do
+      [{:semicolon, _, _} | rest] ->
+        # Simple at-rule like @import url(...);
+        at_rule = %AtRule{name: name, params: params, nodes: []}
+        {at_rule, rest}
+
+      [{:open_brace, _, _} | rest] ->
+        # Block at-rule like @media (...) { ... }
+        {declarations, remaining} = parse_declarations(rest, [])
+
+        case remaining do
+          [{:close_brace, _, _} | rest_tokens] ->
+            at_rule = %AtRule{name: name, params: params, nodes: declarations}
+            {at_rule, rest_tokens}
+
+          [] ->
+            raise CssSyntaxError.new("Unclosed at-rule: missing '}'")
+
+          _ ->
+            raise CssSyntaxError.new("Expected '}' after at-rule declarations")
+        end
+
+      [] ->
+        # At-rule at end of input
+        at_rule = %AtRule{name: name, params: params, nodes: []}
+        {at_rule, []}
+
+      _ ->
+        raise CssSyntaxError.new("Expected ';' or '{' after at-rule")
+    end
+  end
+
+  defp collect_at_rule_params([], acc), do: {Enum.reverse(acc), []}
+
+  defp collect_at_rule_params([{:semicolon, _, _} | _] = tokens, acc),
+    do: {Enum.reverse(acc), tokens}
+
+  defp collect_at_rule_params([{:open_brace, _, _} | _] = tokens, acc),
+    do: {Enum.reverse(acc), tokens}
+
+  defp collect_at_rule_params([token | rest], acc),
+    do: collect_at_rule_params(rest, [token | acc])
+
+  defp extract_params_from_tokens(tokens) do
+    tokens
+    |> Enum.map(fn
+      {:word, value, _, _} -> value
+      {:string, value, _, _} -> value
+      {:open_paren, value, _} -> value
+      {:close_paren, value, _} -> value
+      {:space, value, _} -> value
+      {:space, value, _, _} -> value
+      {:comma, value, _} -> value
+      {:colon, value, _} -> value
+      {_, value, _} -> value
+      {_, value, _, _} -> value
+    end)
+    |> Enum.join("")
+    |> String.trim()
+  end
+
+  defp parse_comment(comment_text, remaining_tokens) do
+    # Extract comment content (remove /* and */)
+    # comment_text is like "/* comment */"
+    text =
+      comment_text
+      # Remove /* and */
+      |> String.slice(2..-3//1)
+
+    # Parse whitespace like PostCSS does
+    if String.trim(text) == "" do
+      # Empty comment, preserve all whitespace as left
+      comment = %Comment{text: "", raws: %{left: text, right: ""}}
+      {comment, remaining_tokens}
+    else
+      # Parse leading and trailing whitespace
+      case Regex.run(~r/^(\s*)(.*?\S)(\s*)$/s, text) do
+        [_, left, content, right] ->
+          comment = %Comment{text: content, raws: %{left: left, right: right}}
+          {comment, remaining_tokens}
+
+        nil ->
+          # Fallback if regex doesn't match
+          comment = %Comment{text: text, raws: %{}}
+          {comment, remaining_tokens}
+      end
+    end
+  end
 end

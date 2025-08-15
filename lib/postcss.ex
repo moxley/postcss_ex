@@ -6,7 +6,7 @@ defmodule Postcss do
   providing CSS parsing, AST manipulation, and stringification.
   """
 
-  alias Postcss.{Parser, Root, Rule, Declaration}
+  alias Postcss.{Parser, Root, Rule, Declaration, AtRule, Comment}
 
   @doc """
   Parses CSS string into a PostCSS AST.
@@ -31,7 +31,7 @@ defmodule Postcss do
 
       iex> root = Postcss.parse(".foo { color: red; }")
       iex> Postcss.stringify(root)
-      ".foo {\\n  color: red\\n}"
+      ".foo {\\n  color: red;\\n}"
   """
   def stringify(%Root{} = root) do
     to_string(root)
@@ -93,5 +93,38 @@ defmodule Postcss do
   """
   def root(nodes \\ []) do
     %Root{nodes: nodes}
+  end
+
+  @doc """
+  Creates a new at-rule node.
+
+  ## Examples
+
+      iex> Postcss.at_rule("import", "url(\\"styles.css\\")")
+      %Postcss.AtRule{name: "import", params: "url(\\"styles.css\\")"}
+
+      iex> decl = Postcss.decl("color", "red")
+      iex> Postcss.at_rule("media", "screen", [decl])
+      %Postcss.AtRule{name: "media", params: "screen", nodes: [decl]}
+  """
+  def at_rule(name, params \\ nil, nodes \\ []) do
+    %AtRule{
+      name: name,
+      params: params,
+      nodes: nodes
+    }
+  end
+
+  @doc """
+  Creates a new comment node.
+
+  ## Examples
+
+      iex> comment = Postcss.comment("This is a comment")
+      iex> comment.text
+      "This is a comment"
+  """
+  def comment(text) do
+    %Comment{text: text}
   end
 end

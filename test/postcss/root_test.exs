@@ -24,7 +24,7 @@ defmodule Postcss.RootTest do
       rule = %Rule{selector: ".foo", nodes: [decl]}
       root = %Root{nodes: [rule]}
 
-      expected = ".foo {\n  color: red\n}"
+      expected = ".foo {\n  color: red;\n}"
       assert to_string(root) == expected
     end
 
@@ -33,7 +33,7 @@ defmodule Postcss.RootTest do
       rule2 = %Rule{selector: ".bar", nodes: [%Declaration{prop: "font-size", value: "12px"}]}
       root = %Root{nodes: [rule1, rule2]}
 
-      expected = ".foo {\n  color: red\n}\n.bar {\n  font-size: 12px\n}"
+      expected = ".foo {\n  color: red;\n}\n.bar {\n  font-size: 12px;\n}"
       assert to_string(root) == expected
     end
 

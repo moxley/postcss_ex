@@ -23,7 +23,7 @@ defmodule Postcss.RuleTest do
       decl = %Declaration{prop: "color", value: "red"}
       rule = %Rule{selector: ".foo", nodes: [decl]}
 
-      expected = ".foo {\n  color: red\n}"
+      expected = ".foo {\n  color: red;\n}"
       assert to_string(rule) == expected
     end
 
@@ -39,7 +39,7 @@ defmodule Postcss.RuleTest do
       decl2 = %Declaration{prop: "font-size", value: "12px"}
       rule = %Rule{selector: ".foo", nodes: [decl1, decl2]}
 
-      expected = ".foo {\n  color: red;\n  font-size: 12px\n}"
+      expected = ".foo {\n  color: red;\n  font-size: 12px;\n}"
       assert to_string(rule) == expected
     end
 

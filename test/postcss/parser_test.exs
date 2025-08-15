@@ -1,7 +1,7 @@
 defmodule Postcss.ParserTest do
   use ExUnit.Case, async: true
 
-  alias Postcss.{Parser, Root, Rule, Declaration}
+  alias Postcss.{Parser, Root, Rule, Declaration, Comment}
 
   describe "basic parsing" do
     test "parses simple declaration" do
@@ -97,6 +97,63 @@ defmodule Postcss.ParserTest do
     test "handles whitespace only" do
       root = Parser.parse("   \n\t  ")
       assert %Root{nodes: []} = root
+    end
+
+    test "handles @import" do
+      css = """
+      @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap");
+      """
+
+      root = Parser.parse(css)
+
+      assert root == %Postcss.Root{
+               source: nil,
+               nodes: [
+                 %Postcss.AtRule{
+                   name: "import",
+                   params:
+                     "url(\"https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap\")",
+                   source: nil,
+                   nodes: [],
+                   raws: %{}
+                 }
+               ],
+               raws: %{},
+               type: :root
+             }
+    end
+
+    test "handles :root" do
+      css = """
+      :root {
+        /* Comment */
+        --accent-color: #2630ed;
+      }
+      """
+
+      root = Parser.parse(css)
+
+      assert %Root{} = root
+      assert length(root.nodes) == 1
+
+      [rule] = root.nodes
+      assert %Rule{} = rule
+      assert rule.selector == ":root"
+      assert length(rule.nodes) == 2
+
+      [comment, declaration] = rule.nodes
+
+      # Verify comment
+      assert %Comment{} = comment
+      assert comment.text == "Comment"
+      assert comment.raws.left == " "
+      assert comment.raws.right == " "
+
+      # Verify declaration
+      assert %Declaration{} = declaration
+      assert declaration.prop == "--accent-color"
+      assert declaration.value == "#2630ed"
+      assert declaration.important == false
     end
   end
 

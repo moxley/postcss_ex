@@ -82,6 +82,27 @@ defmodule Postcss.TokenizerTest do
       assert tokens == expected
     end
 
+    test "handles font declaration" do
+      css = """
+      @import url(\"https://www.example.com/fonts.css\");
+      """
+
+      tokens = Tokenizer.tokenize(css)
+
+      expected = [
+        {:at_word, "@import", 0, 6},
+        {:space, " ", 7},
+        {:word, "url", 8, 10},
+        {:open_paren, "(", 11},
+        {:string, ~s("https://www.example.com/fonts.css"), 12, 46},
+        {:close_paren, ")", 47},
+        {:semicolon, ";", 48},
+        {:space, "\n", 49}
+      ]
+
+      assert tokens == expected
+    end
+
     test "handles empty input" do
       assert Tokenizer.tokenize("") == []
     end

@@ -45,6 +45,13 @@ defmodule Postcss.Tokenizer do
       ?, ->
         tokenize_chars(rest, [{:comma, ",", pos} | acc], pos + 1)
 
+      # Parentheses
+      ?\( ->
+        tokenize_chars(rest, [{:open_paren, "(", pos} | acc], pos + 1)
+
+      ?\) ->
+        tokenize_chars(rest, [{:close_paren, ")", pos} | acc], pos + 1)
+
       ?# ->
         {word, remaining, new_pos} = consume_word([char | rest], pos)
         tokenize_chars(remaining, [{:word, word, pos, new_pos - 1} | acc], new_pos)

@@ -7,6 +7,8 @@ defmodule Postcss.Rule do
   - `#main, .sidebar { font-size: 12px; }`
   """
 
+  alias Postcss.Declaration
+
   defstruct [
     :selector,
     :source,
@@ -28,10 +30,15 @@ defmodule Postcss.Rule do
       else
         declarations =
           rule.nodes
-          |> Enum.with_index()
-          |> Enum.map(fn {node, index} ->
-            suffix = if index < length(rule.nodes) - 1, do: ";", else: ""
-            "  #{node}#{suffix}"
+          |> Enum.map(fn node ->
+            case node do
+              %Declaration{} ->
+                # Always add semicolon after declarations to match PostCSS behavior
+                "  #{node};"
+
+              _ ->
+                "  #{node}"
+            end
           end)
           |> Enum.join("\n")
 
