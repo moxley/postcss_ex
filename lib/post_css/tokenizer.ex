@@ -141,7 +141,7 @@ defmodule PostCSS.Tokenizer do
 
   defp consume_word(chars, start_pos) do
     consume_while(chars, start_pos, fn
-      c when c in [?\s, ?\t, ?\n, ?\r, ?\f, ?{, ?}, ?:, ?;, ?", ?', ?/, ?\(, ?\)] -> false
+      c when c in [?\s, ?\t, ?\n, ?\r, ?\f, ?{, ?}, ?:, ?;, ?", ?', ?\(, ?\)] -> false
       _ -> true
     end)
   end

@@ -74,6 +74,13 @@ defmodule PostCSSTest do
           gap: 0em;
         }
       }
+
+      .WelcomeBackPopUp {
+        padding: 2rem;
+        position: relative;
+        background-color: white;
+        box-shadow: 5px 5px 5px rgb(50 50 50 / 20%);
+      }
       """
 
       root = PostCSS.parse(css)
