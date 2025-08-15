@@ -39,6 +39,41 @@ defmodule PostcssTest do
         --accent-color-lighter: #5e67f2;
         --bg-color: #eeeef7;
       }
+
+      .SideCar .Navigation a:hover,
+      .SideCar .Navigation a:active {
+        color: var(--group-link-hover);
+      }
+
+      /* Marketing Area */
+
+      .gf-area-marketing {
+        font-family: "Playfair Display";
+      }
+
+      /* Members Area */
+
+      .gf-area-members {
+        background-color: var(--bg-color);
+        font-family: "Playfair Display";
+      }
+      """
+
+      root = Postcss.parse(css)
+      css_string = Postcss.stringify(root)
+
+      assert css_string == css
+    end
+
+    test "with media query" do
+      css = """
+      @media only screen and (max-width: 600px) {
+        .app-container-icons {
+          flex-direction: column;
+          align-items: center;
+          gap: 0em;
+        }
+      }
       """
 
       root = Postcss.parse(css)

@@ -45,7 +45,28 @@ defmodule Postcss.Rule do
         else
           # Has children: call body() and get after
           body = body(node)
-          after_raw = Map.get(node.raws || %{}, :after, "\n")
+
+          # If no explicit after raw, infer closing brace indentation from rule's own before indentation
+          after_raw =
+            case Map.get(node.raws || %{}, :after) do
+              nil ->
+                # Infer indentation from the rule's own before value
+                rule_before = Map.get(node.raws || %{}, :before, "")
+
+                if String.contains?(rule_before, "\n") do
+                  # Extract the indentation part (everything after the last newline)
+                  lines = String.split(rule_before, "\n")
+                  last_line = List.last(lines) || ""
+                  # Use the same indentation for the closing brace
+                  "\n#{last_line}"
+                else
+                  "\n"
+                end
+
+              explicit_after ->
+                explicit_after
+            end
+
           {body, after_raw}
         end
 

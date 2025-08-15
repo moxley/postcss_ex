@@ -29,26 +29,27 @@ defmodule Postcss.Parser do
 
   defp parse_root(tokens) do
     {nodes, remaining} = parse_nodes(tokens)
-    
+
     # Collect any trailing whitespace
     trailing_whitespace = collect_trailing_whitespace(remaining, "")
 
     unless Enum.empty?(remaining) and trailing_whitespace == "" do
       # If we have trailing whitespace, that's fine
       # If we have other tokens, that's an error
-      non_whitespace_remaining = Enum.reject(remaining, fn
-        {:space, _, _} -> true
-        {:space, _, _, _} -> true
-        _ -> false
-      end)
-      
+      non_whitespace_remaining =
+        Enum.reject(remaining, fn
+          {:space, _, _} -> true
+          {:space, _, _, _} -> true
+          _ -> false
+        end)
+
       unless Enum.empty?(non_whitespace_remaining) do
         raise CssSyntaxError.new("Unexpected tokens at end of input")
       end
     end
 
     root = %Root{nodes: nodes}
-    
+
     # Add trailing whitespace to raws.after if present
     if trailing_whitespace != "" do
       Raws.put(root, :after, trailing_whitespace)
@@ -58,15 +59,15 @@ defmodule Postcss.Parser do
   end
 
   defp collect_trailing_whitespace([], acc), do: acc
-  
+
   defp collect_trailing_whitespace([{:space, space, _} | rest], acc) do
     collect_trailing_whitespace(rest, acc <> space)
   end
-  
+
   defp collect_trailing_whitespace([{:space, space, _, _} | rest], acc) do
     collect_trailing_whitespace(rest, acc <> space)
   end
-  
+
   defp collect_trailing_whitespace(_, acc), do: acc
 
   defp parse_nodes(tokens) do
@@ -75,15 +76,17 @@ defmodule Postcss.Parser do
 
   defp parse_nodes_with_whitespace([], acc, whitespace) do
     # If we have trailing whitespace, preserve it as remaining space tokens
-    remaining = if whitespace != "" do
-      [{:space, whitespace, 0}]
-    else
-      []
-    end
+    remaining =
+      if whitespace != "" do
+        [{:space, whitespace, 0}]
+      else
+        []
+      end
+
     {Enum.reverse(acc), remaining}
   end
 
-  defp parse_nodes_with_whitespace([{:close_brace, _} | _] = tokens, acc, _whitespace) do
+  defp parse_nodes_with_whitespace([{:close_brace, _, _} | _] = tokens, acc, _whitespace) do
     {Enum.reverse(acc), tokens}
   end
 
@@ -93,7 +96,7 @@ defmodule Postcss.Parser do
   end
 
   defp parse_nodes_with_whitespace([{:space, space, _, _} | rest], acc, whitespace) do
-    # Collect whitespace for the next node  
+    # Collect whitespace for the next node
     parse_nodes_with_whitespace(rest, acc, whitespace <> space)
   end
 
@@ -101,11 +104,13 @@ defmodule Postcss.Parser do
     case parse_node(tokens) do
       {node, remaining} ->
         # Add collected whitespace to node's raws.before
-        node_with_raws = if whitespace != "" do
-          Raws.put(node, :before, whitespace)
-        else
-          node
-        end
+        node_with_raws =
+          if whitespace != "" do
+            Raws.put(node, :before, whitespace)
+          else
+            node
+          end
+
         parse_nodes_with_whitespace(remaining, [node_with_raws | acc], "")
 
       :error ->
@@ -247,24 +252,29 @@ defmodule Postcss.Parser do
       [{:comment, comment_text, _, _} | rest] ->
         # Handle comments inside rule blocks
         {comment, remaining} = parse_comment(comment_text, rest)
-        comment_with_raws = if whitespace != "" do
-          Raws.put(comment, :before, whitespace)
-        else
-          comment
-        end
+
+        comment_with_raws =
+          if whitespace != "" do
+            Raws.put(comment, :before, whitespace)
+          else
+            comment
+          end
+
         parse_declarations_with_whitespace(remaining, [comment_with_raws | acc], "")
 
       _ ->
         case parse_declaration(tokens) do
           {decl, remaining} ->
             # Add collected whitespace to declaration's raws.before
-            decl_with_raws = if whitespace != "" do
-              Raws.put(decl, :before, whitespace)
-            else
-              decl
-            end
-            # Skip semicolon if present
-            remaining = skip_semicolon(remaining)
+            decl_with_raws =
+              if whitespace != "" do
+                Raws.put(decl, :before, whitespace)
+              else
+                decl
+              end
+
+            # Skip semicolon if present, but preserve whitespace for next declaration
+            remaining = skip_semicolon_preserve_whitespace(remaining)
             parse_declarations_with_whitespace(remaining, [decl_with_raws | acc], "")
 
           :error ->
@@ -281,12 +291,12 @@ defmodule Postcss.Parser do
       [{:colon, _, _} | value_tokens] ->
         # Collect spaces after colon
         {after_colon, value_tokens} = collect_spaces(value_tokens, "")
-        
+
         case parse_declaration_value(value_tokens) do
           {value, important, remaining} ->
             # Build the between string (spaces + colon + spaces)
             between = before_colon <> ":" <> after_colon
-            
+
             decl = %Declaration{prop: prop, value: value, important: important}
             decl_with_raws = Raws.put(decl, :between, between)
             {decl_with_raws, remaining}
@@ -303,24 +313,22 @@ defmodule Postcss.Parser do
   defp collect_spaces_before_colon([{:space, space, _} | rest], acc) do
     collect_spaces_before_colon(rest, acc <> space)
   end
-  
+
   defp collect_spaces_before_colon([{:space, space, _, _} | rest], acc) do
     collect_spaces_before_colon(rest, acc <> space)
   end
-  
+
   defp collect_spaces_before_colon(tokens, acc), do: {acc, tokens}
 
   defp collect_spaces([{:space, space, _} | rest], acc) do
     collect_spaces(rest, acc <> space)
   end
-  
+
   defp collect_spaces([{:space, space, _, _} | rest], acc) do
     collect_spaces(rest, acc <> space)
   end
-  
+
   defp collect_spaces(tokens, acc), do: {acc, tokens}
-
-
 
   defp skip_spaces([{:space, _, _} | rest]), do: skip_spaces(rest)
   defp skip_spaces([{:space, _, _, _} | rest]), do: skip_spaces(rest)
@@ -378,8 +386,9 @@ defmodule Postcss.Parser do
     |> String.trim()
   end
 
-  defp skip_semicolon([{:semicolon, _, _} | rest]), do: skip_spaces(rest)
-  defp skip_semicolon(tokens), do: skip_spaces(tokens)
+  # Skip semicolon but preserve whitespace (for use in parse_declarations_with_whitespace)
+  defp skip_semicolon_preserve_whitespace([{:semicolon, _, _} | rest]), do: rest
+  defp skip_semicolon_preserve_whitespace(tokens), do: tokens
 
   defp parse_at_rule(at_rule_text, tokens) do
     # Extract the rule name (remove the @ symbol)
@@ -404,18 +413,19 @@ defmodule Postcss.Parser do
 
       [{:open_brace, _, _} | rest] ->
         # Block at-rule like @media (...) { ... }
-        {declarations, remaining} = parse_declarations(rest, [])
+        # Use parse_nodes to handle both rules and declarations inside at-rules
+        {nodes, remaining} = parse_nodes_with_whitespace(rest, [], "")
 
         case remaining do
           [{:close_brace, _, _} | rest_tokens] ->
-            at_rule = %AtRule{name: name, params: params, nodes: declarations}
+            at_rule = %AtRule{name: name, params: params, nodes: nodes}
             {at_rule, rest_tokens}
 
           [] ->
             raise CssSyntaxError.new("Unclosed at-rule: missing '}'")
 
           _ ->
-            raise CssSyntaxError.new("Expected '}' after at-rule declarations")
+            raise CssSyntaxError.new("Expected '}' after at-rule content")
         end
 
       [] ->
