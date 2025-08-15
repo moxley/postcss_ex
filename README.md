@@ -1,6 +1,6 @@
-# Postcss
+# PostCSS in Elixir
 
-**TODO: Add description**
+An implementation of [PostCSS](https://github.com/postcss/postcss) in Elixir.
 
 ## Installation
 
@@ -18,4 +18,3 @@ end
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
 be found at <https://hexdocs.pm/postcss>.
-
