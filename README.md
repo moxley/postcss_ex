@@ -3,7 +3,7 @@
 [![Hex.pm](https://img.shields.io/hexpm/v/postcss.svg)](https://hex.pm/packages/postcss)
 [![Documentation](https://img.shields.io/badge/docs-hexdocs-blue.svg)](https://hexdocs.pm/postcss)
 
-An Elixir implementation of the popular [PostCSS](https://github.com/postcss/postcss) library, providing CSS parsing, AST manipulation, and stringification capabilities.
+An Elixir implementation of the popular [PostCSS](https://postcss.org/) library, providing CSS parsing, AST manipulation, and stringification capabilities.
 
 ## Features
 
@@ -134,5 +134,5 @@ This project is licensed under the Apache 2.0 License - see the [LICENSE](LICENS
 
 ## Acknowledgments
 
-- Inspired by the original [PostCSS](https://github.com/postcss/postcss) JavaScript library
+- Inspired by the original [PostCSS](https://postcss.org/) JavaScript library
 - Built with [Elixir](https://elixir-lang.org/)

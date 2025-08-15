@@ -2,7 +2,7 @@ defmodule PostCSS do
   @moduledoc """
   PostCSS for Elixir - A tool for transforming CSS with plugins.
 
-  This is an Elixir implementation of the popular PostCSS library,
+  This is an Elixir implementation of the popular [PostCSS](https://postcss.org/) library,
   providing CSS parsing, AST manipulation, and stringification.
   """
 
