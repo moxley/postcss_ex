@@ -397,6 +397,18 @@ defmodule PostCSS.Parser do
   defp skip_semicolon_preserve_whitespace([{:semicolon, _, _} | rest]), do: rest
   defp skip_semicolon_preserve_whitespace(tokens), do: tokens
 
+  # Determine if an at-rule should contain declarations vs rules
+  # Based on common CSS at-rules that typically contain declarations
+  defp should_contain_declarations?(name) do
+    name in [
+      "font-face",
+      "page",
+      "counter-style",
+      "font-feature-values",
+      "property"
+    ]
+  end
+
   defp parse_at_rule(at_rule_text, tokens) do
     # Extract the rule name (remove the @ symbol)
     name = String.slice(at_rule_text, 1..-1//1)
@@ -420,8 +432,13 @@ defmodule PostCSS.Parser do
 
       [{:open_brace, _, _} | rest] ->
         # Block at-rule like @media (...) { ... }
-        # Use parse_nodes to handle both rules and declarations inside at-rules
-        {nodes, remaining} = parse_nodes_with_whitespace(rest, [], "")
+        # Determine if this at-rule should contain declarations or rules
+        {nodes, remaining} =
+          if should_contain_declarations?(name) do
+            parse_declarations_with_whitespace(rest, [], "")
+          else
+            parse_nodes_with_whitespace(rest, [], "")
+          end
 
         case remaining do
           [{:close_brace, _, _} | rest_tokens] ->

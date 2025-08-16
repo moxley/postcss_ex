@@ -121,5 +121,55 @@ defmodule PostCSSTest do
              }
              """
     end
+
+    test "font at rule" do
+      css = """
+      @font-face {
+        font-family: "Avenir LT";
+        src: url(https://mp1md-pub.s3.amazonaws.com/fonts/Avenir-LT-W01-85-Heavy.woff) format("woff");
+      }
+      """
+
+      root = PostCSS.parse(css)
+
+      # Should parse as a single @font-face at-rule
+      assert length(root.nodes) == 1
+
+      at_rule = List.first(root.nodes)
+      assert %PostCSS.AtRule{} = at_rule
+      assert at_rule.name == "font-face"
+      assert at_rule.params == ""
+
+      # Should contain 2 declarations (font-family and src)
+      assert length(at_rule.nodes) == 2
+
+      [font_family, src] = at_rule.nodes
+
+      # Check font-family declaration
+      assert %PostCSS.Declaration{} = font_family
+      assert font_family.prop == "font-family"
+      assert font_family.value == "\"Avenir LT\""
+      assert font_family.important == false
+
+      # Check src declaration
+      assert %PostCSS.Declaration{} = src
+      assert src.prop == "src"
+
+      assert src.value ==
+               "url(https://mp1md-pub.s3.amazonaws.com/fonts/Avenir-LT-W01-85-Heavy.woff) format(\"woff\")"
+
+      assert src.important == false
+
+      # Test round-trip: stringify should produce equivalent CSS
+      result_css = PostCSS.stringify(root)
+
+      # Parse the result and compare structure (allowing for formatting differences)
+      reparsed_root = PostCSS.parse(result_css)
+      assert length(reparsed_root.nodes) == 1
+
+      reparsed_at_rule = List.first(reparsed_root.nodes)
+      assert reparsed_at_rule.name == "font-face"
+      assert length(reparsed_at_rule.nodes) == 2
+    end
   end
 end
