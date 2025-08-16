@@ -88,5 +88,38 @@ defmodule PostCSSTest do
 
       assert css_string == css
     end
+
+    test "stringify comment with blank line after" do
+      css = """
+      .selector {
+        color: red;
+      }
+      """
+
+      root = PostCSS.parse(css)
+
+      comment = %PostCSS.Comment{
+        text: "comment",
+        raws: %{left: " ", right: " "}
+      }
+
+      # To create spacing after the comment, set the 'before' raw on the following node
+      [first_rule | rest] = root.nodes
+      first_rule_with_spacing = %{first_rule | raws: Map.put(first_rule.raws, :before, "\n\n")}
+
+      nodes = [comment, first_rule_with_spacing | rest]
+      root = %PostCSS.Root{root | nodes: nodes}
+
+      result_css = PostCSS.stringify(root)
+
+      # Following JS PostCSS: spacing is controlled by the 'before' raw of the following node
+      assert result_css == """
+             /* comment */
+
+             .selector {
+               color: red;
+             }
+             """
+    end
   end
 end
