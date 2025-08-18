@@ -171,5 +171,76 @@ defmodule PostCSSTest do
       assert reparsed_at_rule.name == "font-face"
       assert length(reparsed_at_rule.nodes) == 2
     end
+
+    test "handles psuedo selectors" do
+      css = """
+      a:hover {
+        color: red;
+      }
+      """
+
+      root = PostCSS.parse(css)
+
+      # Should parse as a single rule with pseudo-selector
+      assert length(root.nodes) == 1
+
+      rule = List.first(root.nodes)
+      assert %PostCSS.Rule{} = rule
+      assert rule.selector == "a:hover"
+
+      # Should contain 1 declaration
+      assert length(rule.nodes) == 1
+
+      [color_decl] = rule.nodes
+
+      # Check color declaration
+      assert %PostCSS.Declaration{} = color_decl
+      assert color_decl.prop == "color"
+      assert color_decl.value == "red"
+      assert color_decl.important == false
+
+      # Test round-trip: stringify should produce equivalent CSS
+      result_css = PostCSS.stringify(root)
+
+      # Parse the result and compare structure
+      reparsed_root = PostCSS.parse(result_css)
+      assert length(reparsed_root.nodes) == 1
+
+      reparsed_rule = List.first(reparsed_root.nodes)
+      assert reparsed_rule.selector == "a:hover"
+      assert length(reparsed_rule.nodes) == 1
+
+      css = PostCSS.stringify(root)
+      assert css == css
+    end
+
+    test "handles multiple selectors" do
+      css = """
+      a:hover,
+      .a:active {
+        color: var(--accent-color-1-60);
+      }
+      """
+
+      root = PostCSS.parse(css)
+
+      assert length(root.nodes) == 1
+
+      rule = List.first(root.nodes)
+      assert %PostCSS.Rule{} = rule
+      assert rule.selector == "a:hover,\n.a:active"
+
+      assert length(rule.nodes) == 1
+
+      [color_decl] = rule.nodes
+
+      assert %PostCSS.Declaration{} = color_decl
+      assert color_decl.prop == "color"
+      assert color_decl.value == "var(--accent-color-1-60)"
+      assert color_decl.important == false
+
+      css = PostCSS.stringify(root)
+      assert css == css
+    end
   end
 end

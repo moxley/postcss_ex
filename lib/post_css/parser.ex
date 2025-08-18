@@ -135,48 +135,40 @@ defmodule PostCSS.Parser do
       [{:at_word, at_rule_text, _, _} | rest] ->
         parse_at_rule(at_rule_text, rest)
 
-      # Simple declaration: word : value
-      [{:word, prop, _, _} | rest] ->
-        rest = skip_spaces(rest)
+      # Word token - could be selector or declaration
+      [{:word, _, _, _} | _] = tokens ->
+        # Follow JavaScript PostCSS logic: collect tokens until decision point
+        case collect_tokens_until_decision_point(tokens) do
+          {:rule, selector_tokens, rule_rest} ->
+            # Found opening brace - parse as rule
+            selector = extract_selector_from_tokens(selector_tokens)
+            {declarations, remaining} = parse_declarations(rule_rest, [])
 
-        case rest do
-          [{:colon, _, _} | value_tokens] ->
-            # This is a declaration
-            case parse_declaration_value(value_tokens) do
-              {value, important, remaining} ->
-                decl = %Declaration{prop: prop, value: value, important: important}
+            case remaining do
+              [{:close_brace, _, _} | rest_tokens] ->
+                rule = %Rule{selector: selector, nodes: declarations}
+                {rule, rest_tokens}
+
+              [] ->
+                raise CssSyntaxError.new("Unclosed rule: missing '}'")
+
+              _ ->
+                raise CssSyntaxError.new("Expected '}' after rule declarations")
+            end
+
+          {:declaration, collected_tokens, remaining} ->
+            # Found semicolon/end with colon - parse as declaration
+            case parse_declaration(collected_tokens) do
+              {decl, _} ->
                 {decl, remaining}
 
               :error ->
-                raise CssSyntaxError.new("Failed to parse declaration value")
+                raise CssSyntaxError.new("Failed to parse declaration")
             end
 
-          _ ->
-            # This might be a selector, collect all tokens until we find an open brace
-            case collect_selector_tokens(tokens) do
-              {[_ | _] = selector_tokens, [{:open_brace, _, _} | rule_rest]} ->
-                selector = extract_selector_from_tokens(selector_tokens)
-                {declarations, remaining} = parse_declarations(rule_rest, [])
-
-                case remaining do
-                  [{:close_brace, _, _} | rest_tokens] ->
-                    rule = %Rule{selector: selector, nodes: declarations}
-                    {rule, rest_tokens}
-
-                  [] ->
-                    raise CssSyntaxError.new("Unclosed rule: missing '}'")
-
-                  _ ->
-                    raise CssSyntaxError.new("Expected '}' after rule declarations")
-                end
-
-              {[_ | _] = tokens_found, _} ->
-                [first_token | _] = tokens_found
-                raise CssSyntaxError.new("Unexpected token: #{inspect(first_token)}")
-
-              _ ->
-                :error
-            end
+          :error ->
+            [first_token | _] = tokens
+            raise CssSyntaxError.new("Unexpected token: #{inspect(first_token)}")
         end
 
       # Other tokens - try to parse as selector
@@ -206,6 +198,50 @@ defmodule PostCSS.Parser do
             :error
         end
     end
+  end
+
+  # Follow JavaScript PostCSS logic: collect tokens until we find a decision point
+  # Returns {:rule, selector_tokens, remaining} if we find {
+  # Returns {:declaration, tokens, remaining} if we find ; or end with colon
+  # Returns :error otherwise
+  defp collect_tokens_until_decision_point(tokens) do
+    collect_tokens_until_decision_point(tokens, [], false)
+  end
+
+  defp collect_tokens_until_decision_point([], acc, has_colon) do
+    if has_colon do
+      {:declaration, Enum.reverse(acc), []}
+    else
+      :error
+    end
+  end
+
+  defp collect_tokens_until_decision_point([{:semicolon, _, _} | rest], acc, has_colon) do
+    if has_colon do
+      {:declaration, Enum.reverse(acc), rest}
+    else
+      :error
+    end
+  end
+
+  defp collect_tokens_until_decision_point([{:open_brace, _, _} | rest], acc, _has_colon) do
+    {:rule, Enum.reverse(acc), rest}
+  end
+
+  defp collect_tokens_until_decision_point([{:close_brace, _, _} | _] = tokens, acc, has_colon) do
+    if has_colon do
+      {:declaration, Enum.reverse(acc), tokens}
+    else
+      :error
+    end
+  end
+
+  defp collect_tokens_until_decision_point([{:colon, _, _} = token | rest], acc, _has_colon) do
+    collect_tokens_until_decision_point(rest, [token | acc], true)
+  end
+
+  defp collect_tokens_until_decision_point([token | rest], acc, has_colon) do
+    collect_tokens_until_decision_point(rest, [token | acc], has_colon)
   end
 
   defp collect_selector_tokens(tokens) do
@@ -336,10 +372,6 @@ defmodule PostCSS.Parser do
   end
 
   defp collect_spaces(tokens, acc), do: {acc, tokens}
-
-  defp skip_spaces([{:space, _, _} | rest]), do: skip_spaces(rest)
-  defp skip_spaces([{:space, _, _, _} | rest]), do: skip_spaces(rest)
-  defp skip_spaces(tokens), do: tokens
 
   defp parse_declaration_value(tokens) do
     case collect_value_tokens(tokens, []) do
