@@ -20,7 +20,7 @@ Add `postcss` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:postcss, "~> 0.1.2"}
+    {:postcss, "~> 0.1.3"}
   ]
 end
 ```
